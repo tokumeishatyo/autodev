@@ -48,7 +48,7 @@ cd /workspace/Demo
 起動後、4つのペインで以下が表示されます：
 - **CEO（左上・紫）**: instructions_ceo.mdの内容
 - **Manager（右上・オレンジ）**: instructions_manager.mdの内容
-- **Review（左下・青）**: instructions_review.mdの内容
+- **Reviewer（左下・青）**: instructions_review.mdの内容
 - **Developer（右下・緑）**: instructions_developer.mdの内容
 
 ### 3. CEOペインで作業開始
@@ -68,7 +68,7 @@ Webベースのタスク管理アプリケーション
 ### 4. 以降は自動的に進行
 - ManagerがCEOの指示を受けて要件定義書作成開始
 - CEO-Manager間で段階的な議論
-- 承認後、Developer・Reviewが順次参加
+- 承認後、Developer・Reviewerが順次参加
 
 ## ペイン間の移動方法
 ```bash
@@ -81,7 +81,7 @@ Ctrl + B, ↓  # 下のペインへ
 # または番号で直接移動
 Ctrl + B, 0  # CEOペイン（左上）
 Ctrl + B, 1  # Managerペイン（右上）
-Ctrl + B, 2  # Reviewペイン（左下）
+Ctrl + B, 2  # Reviewerペイン（左下）
 Ctrl + B, 3  # Developerペイン（右下）
 ```
 
@@ -125,23 +125,23 @@ tmux attach-session -t claude_workspace
 ### Phase 2: 詳細仕様・テスト手順書作成（手順8-15）
 - Manager→Developer詳細仕様書作成指示
 - Developer作成（実装開始しない）
-- Manager→Review文書チェック依頼
-- Review厳格チェック実施
+- Manager→Reviewer文書チェック依頼
+- Reviewer厳格チェック実施
 - Manager→Developer修正指示（承認まで繰り返し）
 
 ### Phase 3: 実装・開発（手順16-21）
 - Manager→Developer実装開始指示
 - Developer実装（レビュー依頼中は進行停止）
-- Manager→Reviewコードレビュー・単体テスト依頼
-- Review厳格レビュー実施
+- Manager→Reviewerコードレビュー・単体テスト依頼
+- Reviewer厳格レビュー実施
 - 手順16-20をアプリ完成まで繰り返し
 
 ### Phase 4: 総合テスト・完了（手順22-29）
-- Manager→Review総合テスト依頼
-- Review総合テスト実施
+- Manager→Reviewer総合テスト依頼
+- Reviewer総合テスト実施
 - Manager→CEO完了報告
 - Manager→DeveloperREADME.md作成依頼
-- Manager→ReviewREADME.mdレビュー依頼
+- Manager→ReviewerREADME.mdレビュー依頼
 - Manager→CEO最終納品
 
 ## ファイル構成
@@ -155,7 +155,7 @@ tmux attach-session -t claude_workspace
     ├── instructions_ceo.md （CEO用指示書）
     ├── instructions_manager.md （Manager用指示書）
     ├── instructions_developer.md （Developer用指示書）
-    └── instructions_review.md （Review用指示書）
+    └── instructions_review.md （Reviewer用指示書）
 ```
 
 これで開発プロジェクトが開始されます。最初はCEO→Managerの要件定義段階から始まり、段階的に全体が動き出します。

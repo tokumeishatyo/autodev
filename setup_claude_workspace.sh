@@ -23,9 +23,9 @@ tmux select-pane -t 1
 tmux send-keys "echo 'Manager Pane'" C-m
 tmux select-pane -P 'bg=#1f1611,fg=#ffb366'
 
-# Review (bottom-left) - Dark blue
+# Reviewer (bottom-left) - Dark blue
 tmux select-pane -t 2
-tmux send-keys "echo 'Review Pane'" C-m
+tmux send-keys "echo 'Reviewer Pane'" C-m
 tmux select-pane -P 'bg=#0f1419,fg=#87ceeb'
 
 # Developer (bottom-right) - Dark green
@@ -43,7 +43,7 @@ tmux select-pane -t 1
 tmux send-keys "claude --model sonnet" C-m
 tmux send-keys "cat WorkFlow/instructions_manager.md" C-m
 
-# Start Claude with Sonnet model in Review pane
+# Start Claude with Sonnet model in Reviewer pane
 tmux select-pane -t 2
 tmux send-keys "claude --dangerously-skip-permissions --model sonnet" C-m
 tmux send-keys "cat WorkFlow/instructions_review.md" C-m

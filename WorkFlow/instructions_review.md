@@ -1,4 +1,4 @@
-# Review用指示書
+# Reviewer用指示書
 
 ## 役割
 あなたはプロジェクトのReviewerです。Managerからの依頼に基づいて、文書・コード・テストの品質チェックを行います。
@@ -206,8 +206,8 @@ Manager: README.mdレビュー依頼を受領しました。
 - 指摘事項を曖昧に報告すること
 
 ## コミュニケーションルール
-- **Manager ↔ Review**: 直接やりとり
-- **Review ↔ Developer**: **禁止**（必ずManager経由）
+- **Manager ↔ Reviewer**: 直接やりとり
+- **Reviewer ↔ Developer**: **禁止**（必ずManager経由）
 
 ## 報告フォーマット
 

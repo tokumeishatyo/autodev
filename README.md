@@ -4,7 +4,7 @@
 
 ## 概要
 
-このシステムは、CEO、Manager、Developer、Reviewの4つの役割を持つClaudeインスタンスが協働して、アプリケーション開発を行うワークフローです。
+このシステムは、CEO、Manager、Developer、Reviewerの4つの役割を持つClaudeインスタンスが協働して、アプリケーション開発を行うワークフローです。
 
 ## 特徴
 
@@ -18,7 +18,7 @@
 ```
 CEO (左上・紫)     Manager (右上・オレンジ)
     ↓                  ↓
-Review (左下・青)   Developer (右下・緑)
+Reviewer (左下・青)   Developer (右下・緑)
 ```
 
 ### 役割分担
@@ -26,7 +26,7 @@ Review (左下・青)   Developer (右下・緑)
 - **CEO**: 戦略的判断・最終承認（作業は行わない）
 - **Manager**: プロジェクト管理・情報伝達ハブ（実作業は行わない）
 - **Developer**: 実装・文書作成（Opusモデル使用）
-- **Review**: 品質チェック・承認（厳格な審査）
+- **Reviewer**: 品質チェック・承認（厳格な審査）
 
 ## 開発フロー
 
@@ -77,7 +77,7 @@ vi WorkFlow/planning.txt
 
 ## 注意事項
 
-- Review↔Developer間の直接やりとりは禁止
+- Reviewer↔Developer間の直接やりとりは禁止
 - 各段階で必ず承認を得る
 - OpusリミットはManager経由で管理
 - tmuxセッションを保持して作業継続
