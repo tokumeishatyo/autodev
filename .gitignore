@@ -16,21 +16,21 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Generated files
-opus_limit_log.md
-requirements.md
-external_spec.md
-detailed_spec.md
-unit_test_plan.md
-integration_test_plan.md
-coding_log.md
-discussion_log.md
-work_notes.md
+# Generated files (will be stored in docs/)
+docs/opus_limit_log.md
+docs/requirements.md
+docs/external_spec.md
+docs/detailed_spec.md
+docs/unit_test_plan.md
+docs/integration_test_plan.md
+docs/coding_log.md
+docs/discussion_log.md
+docs/work_notes.md
 
-# Activity logs
-activity_log.txt
-developer_work_log.txt
-git_activity_log.txt
+# Activity logs (will be stored in logs/)
+logs/activity_log.txt
+logs/developer_work_log.txt
+logs/git_activity_log.txt
 
 # Build outputs
 dist/
