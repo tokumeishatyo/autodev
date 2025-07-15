@@ -37,6 +37,7 @@ tmux select-pane -P 'bg=#0d1b0d,fg=#90ee90'
 tmux select-pane -t 0
 tmux send-keys "claude --model sonnet" C-m
 tmux send-keys "cat WorkFlow/instructions_ceo.md" C-m
+tmux send-keys "cat WorkFlow/planning.txt" C-m
 
 # Start Claude with Sonnet model in Manager pane
 tmux select-pane -t 1
@@ -52,6 +53,9 @@ tmux send-keys "cat WorkFlow/instructions_review.md" C-m
 tmux select-pane -t 3
 tmux send-keys "claude --dangerously-skip-permissions --model opus" C-m
 tmux send-keys "cat WorkFlow/instructions_developer.md" C-m
+
+# Focus on CEO pane to start the workflow
+tmux select-pane -t 0
 
 # Attach to the session
 tmux attach-session -t claude_workspace
