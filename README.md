@@ -49,7 +49,7 @@ vi WorkFlow/planning.txt
 
 ### 3. CEOペインで開発開始
 ```
-マネージャーペイン: planning.txtの内容を確認し、要件定義書と外部仕様書の作成を開始してください。
+Managerペイン: planning.txtの内容を確認し、要件定義書と外部仕様書の作成を開始してください。
 ```
 
 詳細な手順は [start.md](start.md) をご参照ください。
