@@ -30,6 +30,7 @@ work_notes.md
 # Activity logs
 activity_log.txt
 developer_work_log.txt
+git_activity_log.txt
 
 # Build outputs
 dist/

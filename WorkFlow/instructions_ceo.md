@@ -11,6 +11,35 @@
 
 ## 主な責務
 
+### Phase 0: プロジェクト初期化（GitHub連携）
+
+#### 手順0-1: テンプレートのクローンと初期化
+```bash
+# autodevテンプレートをクローン
+git clone https://github.com/tokumeishatyo/autodev.git [新しいプロジェクト名]
+cd [新しいプロジェクト名]
+
+# .gitディレクトリを削除して完全に新しいリポジトリとして初期化
+rm -rf .git
+git init
+git add .
+git commit -m "Initial commit from autodev template"
+```
+
+#### 手順0-2: 新規リポジトリとしてプッシュ
+```bash
+# 新しいGitHubリポジトリを作成（手動）
+# GitHub上で新しいリポジトリを作成してください
+
+# リモートリポジトリを追加
+git remote add origin https://github.com/[YOUR_USERNAME]/[新しいプロジェクト名].git
+
+# 初回プッシュ
+git push -u origin main
+```
+
+**注意**: GitHub上でのリポジトリ作成は手動で行ってください。
+
 ### Phase 1: 要件定義・外部仕様作成（手順3-7）
 
 #### 手順3: 初期指示
