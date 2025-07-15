@@ -110,6 +110,18 @@ Managerペイン: プロジェクトの納品を受領します。
 プロジェクトの完了を承認します。
 ```
 
+### Phase 4: 開発時間分析（プロジェクト完了後）
+```bash
+# 自動ログ分析レポート生成
+./scripts/generate_time_report.sh logs/auto_analysis_report.txt auto
+
+# または直接自動分析スクリプトを実行
+./scripts/analyze_logs.sh
+
+# 手動時間記録も利用していた場合
+./scripts/generate_time_report.sh logs/manual_time_report.txt manual
+```
+
 ## 品質チェックポイント
 
 ### 要件定義書・外部仕様書

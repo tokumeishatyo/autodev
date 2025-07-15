@@ -31,6 +31,9 @@ docs/work_notes.md
 logs/activity_log.txt
 logs/developer_work_log.txt
 logs/git_activity_log.txt
+logs/time_tracking_log.txt
+logs/time_report.txt
+logs/current_task.txt
 
 # Build outputs
 dist/
