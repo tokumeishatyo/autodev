@@ -13,11 +13,18 @@ fi
 # 現在のペインを保存
 CURRENT_PANE=$(tmux display-message -p '#P')
 
+# 作業種別を自動検出
+WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 0 1)
+
+# Managerペインで進捗表示を開始
+/workspace/Demo/scripts/start_progress.sh 1 "$WORK_TYPE" >/dev/null 2>&1 &
+
 # Managerペイン（pane 1）に切り替えてメッセージを送信
 tmux select-pane -t claude_workspace:0.1
-tmux send-keys -t claude_workspace:0.1 "$MESSAGE" C-m
+tmux send-keys -t claude_workspace:0.1 "$MESSAGE"
+tmux send-keys -t claude_workspace:0.1 C-m
 
 # 元のペインに戻る
 tmux select-pane -t claude_workspace:0.$CURRENT_PANE
 
-echo "[CEO → Manager] メッセージを送信しました"
+echo "[CEO → Manager] メッセージを送信しました (進捗表示開始: $WORK_TYPE)"

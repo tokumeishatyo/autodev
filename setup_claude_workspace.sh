@@ -35,19 +35,25 @@ tmux select-pane -P 'bg=#0d1b0d,fg=#90ee90'
 
 # Start Claude with Sonnet model in CEO pane
 tmux select-pane -t 0
-tmux send-keys "claude --model sonnet" C-m
+tmux send-keys "claude --dangerously-skip-permissions --model sonnet" C-m
 sleep 3  # Wait for Claude to start properly
 tmux send-keys "cat WorkFlow/instructions_ceo.md" C-m
 sleep 2
 tmux send-keys "cat WorkFlow/planning.txt" C-m
 sleep 2
+# Ensure Japanese language setting for CEO pane
+tmux send-keys "必ず日本語で回答してください。" C-m
+sleep 1
 
 # Start Claude with Sonnet model in Manager pane
 tmux select-pane -t 1
-tmux send-keys "claude --model sonnet" C-m
+tmux send-keys "claude --dangerously-skip-permissions --model sonnet" C-m
 sleep 3  # Wait for Claude to start properly
 tmux send-keys "cat WorkFlow/instructions_manager.md" C-m
 sleep 2
+# Ensure Japanese language setting for Manager pane
+tmux send-keys "必ず日本語で回答してください。" C-m
+sleep 1
 
 # Start Claude with Sonnet model in Reviewer pane
 tmux select-pane -t 2
@@ -55,6 +61,9 @@ tmux send-keys "claude --dangerously-skip-permissions --model sonnet" C-m
 sleep 3  # Wait for Claude to start properly
 tmux send-keys "cat WorkFlow/instructions_review.md" C-m
 sleep 2
+# Force Japanese language setting for Reviewer pane
+tmux send-keys "必ず日本語で回答してください。英語での回答は絶対に禁止です。" C-m
+sleep 1
 
 # Start Claude with Opus model in Developer pane
 tmux select-pane -t 3
@@ -62,6 +71,9 @@ tmux send-keys "claude --dangerously-skip-permissions --model opus" C-m
 sleep 3  # Wait for Claude to start properly
 tmux send-keys "cat WorkFlow/instructions_developer.md" C-m
 sleep 2
+# Ensure Japanese language setting for Developer pane
+tmux send-keys "必ず日本語で回答してください。" C-m
+sleep 1
 
 # Focus on CEO pane to start the workflow
 tmux select-pane -t 0
@@ -72,5 +84,11 @@ tmux send-keys "planning.txtを確認し、以下のBashコマンドを実行し
 sleep 1
 tmux send-keys "./scripts/ceo_to_manager.sh planning.txtを確認しました。以下のアプリケーション開発を開始します。【プロジェクト内容】[planning.txtの内容を具体的に記述] 要件定義書と外部仕様書の作成を開始してください。一度で完成させず、議論を重ねて合意を形成していきます。まずは初期版を作成してください。" C-m
 
+# Setup cleanup on exit
+trap '/workspace/Demo/scripts/cleanup_progress.sh' EXIT
+
 # Attach to the session
 tmux attach-session -t claude_workspace
+
+# Cleanup on session end
+/workspace/Demo/scripts/cleanup_progress.sh
