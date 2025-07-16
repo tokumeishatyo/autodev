@@ -34,6 +34,10 @@ logs/git_activity_log.txt
 logs/time_tracking_log.txt
 logs/time_report.txt
 logs/current_task.txt
+logs/*.png
+logs/*.jpg
+logs/*.jpeg
+logs/*.gif
 
 # Build outputs
 dist/
