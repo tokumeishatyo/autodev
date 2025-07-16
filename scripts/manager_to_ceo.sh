@@ -19,6 +19,9 @@ CURRENT_PANE=$(tmux display-message -p '#P')
 # 作業種別を自動検出
 WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 0)
 
+# ステータスペインでCEO作業開始を表示
+/workspace/Demo/scripts/update_status_pane.sh 0 "メッセージを受信、作業を開始しています..." "$WORK_TYPE" >/dev/null 2>&1
+
 # CEOペインで進捗表示を開始
 /workspace/Demo/scripts/start_progress.sh 0 "$WORK_TYPE" >/dev/null 2>&1 &
 

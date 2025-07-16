@@ -34,7 +34,7 @@ read_progress_status() {
     fi
 }
 
-# 進捗メッセージを送信
+# 進捗メッセージをステータスペインに送信
 send_progress_message() {
     local target_pane="$1"
     local work_type="$2"
@@ -44,6 +44,16 @@ send_progress_message() {
     local counter_key="${target_pane}_${work_type}"
     COUNTERS[$counter_key]=$((${COUNTERS[$counter_key]:-0} + 1))
     local count=${COUNTERS[$counter_key]}
+    
+    # 役割名を取得
+    local role_name=""
+    case $target_pane in
+        0) role_name="🟣 CEO" ;;
+        1) role_name="🟠 Manager" ;;
+        2) role_name="🔵 Reviewer" ;;
+        3) role_name="🟢 Developer" ;;
+        *) role_name="⚪ Unknown" ;;
+    esac
     
     # メッセージを構築
     local base_message="${PROGRESS_MESSAGES[$work_type]:-"⏳ 作業中..."}"
@@ -58,11 +68,17 @@ send_progress_message() {
         0) dots="●●●" ;;
     esac
     
-    local full_message="$progress_message $dots"
-    
-    # tmuxペインにメッセージを送信
+    # ステータスペイン（pane 4）にメッセージを送信
     if tmux list-sessions | grep -q "claude_workspace"; then
-        tmux send-keys -t "claude_workspace:0.$target_pane" "$full_message" C-m
+        # ステータスペインをクリアして新しい情報を表示
+        tmux send-keys -t "claude_workspace:0.4" "clear" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo '=== 📊 進捗ステータス ==='" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo '🎯 アクティブ役割: $role_name'" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo '📋 作業内容: $progress_message $dots'" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo '⏰ 開始時刻: $(date -d @$START_TIME +"%H:%M:%S")'" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
+        tmux send-keys -t "claude_workspace:0.4" "echo '💡 Tip: この表示はClaudeの作業に影響しません'" C-m
     fi
 }
 
