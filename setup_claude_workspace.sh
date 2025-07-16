@@ -68,9 +68,9 @@ tmux select-pane -t 0
 
 # Send initial message to CEO to start the workflow
 sleep 5  # Wait for all panes to be ready
-tmux send-keys "planning.txtを確認し、Managerペインに以下の形式で初期指示を送信してください：" C-m
+tmux send-keys "planning.txtを確認し、以下のBashコマンドを実行してManagerに初期指示を送信してください：" C-m
 sleep 1
-tmux send-keys "「Managerペイン: planning.txtを確認しました。以下のアプリケーション開発を開始します。【プロジェクト内容】[具体的な要求を記述] 要件定義書と外部仕様書の作成を開始してください。」" C-m
+tmux send-keys "./scripts/ceo_to_manager.sh planning.txtを確認しました。以下のアプリケーション開発を開始します。【プロジェクト内容】[planning.txtの内容を具体的に記述] 要件定義書と外部仕様書の作成を開始してください。一度で完成させず、議論を重ねて合意を形成していきます。まずは初期版を作成してください。" C-m
 
 # Attach to the session
 tmux attach-session -t claude_workspace
