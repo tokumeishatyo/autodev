@@ -1,17 +1,24 @@
 #!/bin/bash
 
-# Create new tmux session with 2x2 grid layout (original design)
+# Create new tmux session with 3x2 grid layout for devcontainer
 tmux new-session -d -s claude_workspace
 
-# Create standard 2x2 grid
-tmux split-window -h -p 50
-tmux split-window -v -p 50  
-tmux select-pane -t 0
-tmux split-window -v -p 50
+# Create 3x2 grid
+# First split horizontally to create 3 columns
+tmux split-window -h -p 67  # Create right 1/3
+tmux split-window -h -p 50  # Split left 2/3 into two halves
 
-# Final 2x2 layout:
-# 0: CEO (top-left)      1: Manager (top-right)
-# 2: Reviewer (bottom-left) 3: Developer (bottom-right)
+# Now split each column vertically
+tmux select-pane -t 0
+tmux split-window -v -p 50  # Split leftmost column
+tmux select-pane -t 2
+tmux split-window -v -p 50  # Split middle column  
+tmux select-pane -t 4
+tmux split-window -v -p 50  # Split rightmost column
+
+# Final 3x2 layout:
+# 0: CEO (top-left)      2: Reviewer (top-middle)     4: Progress (top-right)
+# 1: Manager (bottom-left) 3: Developer (bottom-middle) 5: Usage (bottom-right)
 
 # Set pane titles and colors (eye-friendly dark backgrounds)
 # CEO (top-left) - Dark purple/pink
@@ -19,20 +26,30 @@ tmux select-pane -t 0
 tmux send-keys "echo 'CEO Pane'" C-m
 tmux select-pane -P 'bg=#1a0d1a,fg=#dda0dd'
 
-# Manager (top-right) - Dark orange/amber
+# Manager (bottom-left) - Dark orange/amber
 tmux select-pane -t 1
 tmux send-keys "echo 'Manager Pane'" C-m
 tmux select-pane -P 'bg=#1f1611,fg=#ffb366'
 
-# Reviewer (bottom-left) - Dark blue
+# Reviewer (top-middle) - Dark blue
 tmux select-pane -t 2
 tmux send-keys "echo 'Reviewer Pane'" C-m
 tmux select-pane -P 'bg=#0f1419,fg=#87ceeb'
 
-# Developer (bottom-right) - Dark green
+# Developer (bottom-middle) - Dark green
 tmux select-pane -t 3
 tmux send-keys "echo 'Developer Pane'" C-m
 tmux select-pane -P 'bg=#0d1b0d,fg=#90ee90'
+
+# Progress Monitor (top-right) - Dark gray/white
+tmux select-pane -t 4
+tmux send-keys "echo 'Progress Monitor'" C-m
+tmux select-pane -P 'bg=#1c1c1c,fg=#ffffff'
+
+# Usage Monitor (bottom-right) - Dark yellow/gold
+tmux select-pane -t 5
+tmux send-keys "echo 'Usage Monitor'" C-m
+tmux select-pane -P 'bg=#1f1f0a,fg=#ffd700'
 
 # Start Claude with Sonnet model in CEO pane
 tmux select-pane -t 0
@@ -84,6 +101,14 @@ sleep 5
 tmux send-keys "必ず日本語で回答してください。"
 tmux send-keys C-m
 sleep 5
+
+# Start progress monitor in dedicated pane (pane 4)
+tmux select-pane -t 4
+tmux send-keys "/workspace/Demo/scripts/progress_monitor.sh" C-m
+
+# Start usage monitor in dedicated pane (pane 5)
+tmux select-pane -t 5
+tmux send-keys "/workspace/Demo/scripts/usage_monitor_display.sh monitor" C-m
 
 # Focus on CEO pane to start the workflow
 tmux select-pane -t 0

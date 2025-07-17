@@ -16,6 +16,13 @@ CURRENT_PANE=$(tmux display-message -p '#P')
 # 作業種別を自動検出
 WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 0 1)
 
+# Claude使用量をチェック
+echo "📊 Claude使用量をチェックしています..."
+if ! /workspace/Demo/scripts/check_claude_usage.sh; then
+    echo "❌ 使用量チェックでエラーが発生しました。"
+    exit 1
+fi
+
 # 独立ターミナルの進捗モニターに状態更新
 /workspace/Demo/scripts/update_progress_status.sh "Manager" "CEOからの指示を受信、作業を開始しています..." "$WORK_TYPE" >/dev/null 2>&1
 

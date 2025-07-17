@@ -13,12 +13,19 @@ elif command -v konsole >/dev/null 2>&1; then
 elif command -v alacritty >/dev/null 2>&1; then
     alacritty -e bash -c "/workspace/Demo/scripts/progress_monitor.sh; exec bash" &
 else
-    echo "⚠️ 新しいターミナルを自動起動できません。"
-    echo "手動で新しいターミナルを開いて以下のコマンドを実行してください："
+    echo "⚠️ GUIターミナルエミュレータが見つかりません。"
+    echo "🔄 バックグラウンドモードで進捗監視を開始します..."
+    
+    # バックグラウンドで進捗監視を開始
+    nohup /workspace/Demo/scripts/progress_monitor.sh > /tmp/autodev_status/progress_monitor.log 2>&1 &
+    echo $! > /tmp/autodev_status/progress_monitor.pid
+    
+    echo "✅ 進捗監視がバックグラウンドで開始されました！"
+    echo "📊 監視状況を確認するには以下のコマンドを実行："
+    echo "    tail -f /tmp/autodev_status/progress_monitor.log"
+    echo "    ./scripts/usage_monitor_display.sh"
     echo ""
-    echo "  /workspace/Demo/scripts/progress_monitor.sh"
-    echo ""
-    exit 1
+    return 0
 fi
 
 echo "✅ 進捗モニターが別ターミナルで起動されました！"
