@@ -14,13 +14,10 @@ fi
 CURRENT_PANE=$(tmux display-message -p '#P')
 
 # 作業種別を自動検出
-WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 2)
+WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 3)
 
-# ステータスペインでReviewer作業開始を表示
-/workspace/Demo/scripts/update_status_pane.sh 2 "メッセージを受信、作業を開始しています..." "$WORK_TYPE" >/dev/null 2>&1
-
-# Reviewerペインで進捗表示を開始
-/workspace/Demo/scripts/start_progress.sh 2 "$WORK_TYPE" >/dev/null 2>&1 &
+# 独立ターミナルの進捗モニターに状態更新
+/workspace/Demo/scripts/update_progress_status.sh "Reviewer" "Managerからのレビュー依頼を受信、確認中..." "$WORK_TYPE" >/dev/null 2>&1
 
 # Reviewerペイン（pane 2）に切り替えてメッセージを送信
 tmux select-pane -t claude_workspace:0.2

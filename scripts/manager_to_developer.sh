@@ -14,13 +14,10 @@ fi
 CURRENT_PANE=$(tmux display-message -p '#P')
 
 # 作業種別を自動検出
-WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 3)
+WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 4)
 
-# ステータスペインでDeveloper作業開始を表示
-/workspace/Demo/scripts/update_status_pane.sh 3 "メッセージを受信、作業を開始しています..." "$WORK_TYPE" >/dev/null 2>&1
-
-# Developerペインで進捗表示を開始
-/workspace/Demo/scripts/start_progress.sh 3 "$WORK_TYPE" >/dev/null 2>&1 &
+# 独立ターミナルの進捗モニターに状態更新
+/workspace/Demo/scripts/update_progress_status.sh "Developer" "Managerからの指示を受信、開発作業を開始..." "$WORK_TYPE" >/dev/null 2>&1
 
 # Developerペイン（pane 3）に切り替えてメッセージを送信
 tmux select-pane -t claude_workspace:0.3

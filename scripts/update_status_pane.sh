@@ -18,8 +18,8 @@ WORK_TYPE="${3:-"general"}"
 case $ACTIVE_PANE in
     0) ROLE_NAME="🟣 CEO" ;;
     1) ROLE_NAME="🟠 Manager" ;;
-    2) ROLE_NAME="🔵 Reviewer" ;;
-    3) ROLE_NAME="🟢 Developer" ;;
+    3) ROLE_NAME="🔵 Reviewer" ;;
+    4) ROLE_NAME="🟢 Developer" ;;
     *) ROLE_NAME="⚪ Unknown" ;;
 esac
 
@@ -42,14 +42,14 @@ if ! tmux list-sessions | grep -q "claude_workspace"; then
     exit 1
 fi
 
-# ステータスペイン（pane 4）を更新
-tmux send-keys -t "claude_workspace:0.4" "clear" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo '=== 📊 進捗ステータス ==='" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo '🎯 アクティブ役割: $ROLE_NAME'" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo '$WORK_ICON 状態: $MESSAGE'" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo '⏰ 更新時刻: $(date +"%H:%M:%S")'" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
-tmux send-keys -t "claude_workspace:0.4" "echo '💡 この表示はClaudeの作業を妨げません'" C-m
+# ステータスペイン（pane 2）を更新
+tmux send-keys -t "claude_workspace:0.2" "clear" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo '=== 📊 進捗ステータス ==='" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo ''" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo '🎯 アクティブ役割: $ROLE_NAME'" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo '$WORK_ICON 状態: $MESSAGE'" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo '⏰ 更新時刻: $(date +"%H:%M:%S")'" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo ''" C-m
+tmux send-keys -t "claude_workspace:0.2" "echo '💡 この表示はClaudeの作業を妨げません'" C-m
 
 echo "ステータスペインを更新しました: $ROLE_NAME - $MESSAGE"

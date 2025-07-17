@@ -50,8 +50,8 @@ send_progress_message() {
     case $target_pane in
         0) role_name="🟣 CEO" ;;
         1) role_name="🟠 Manager" ;;
-        2) role_name="🔵 Reviewer" ;;
-        3) role_name="🟢 Developer" ;;
+        3) role_name="🔵 Reviewer" ;;
+        4) role_name="🟢 Developer" ;;
         *) role_name="⚪ Unknown" ;;
     esac
     
@@ -68,17 +68,17 @@ send_progress_message() {
         0) dots="●●●" ;;
     esac
     
-    # ステータスペイン（pane 4）にメッセージを送信
+    # ステータスペイン（pane 2）にメッセージを送信
     if tmux list-sessions | grep -q "claude_workspace"; then
         # ステータスペインをクリアして新しい情報を表示
-        tmux send-keys -t "claude_workspace:0.4" "clear" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo '=== 📊 進捗ステータス ==='" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo '🎯 アクティブ役割: $role_name'" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo '📋 作業内容: $progress_message $dots'" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo '⏰ 開始時刻: $(date -d @$START_TIME +"%H:%M:%S")'" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo ''" C-m
-        tmux send-keys -t "claude_workspace:0.4" "echo '💡 Tip: この表示はClaudeの作業に影響しません'" C-m
+        tmux send-keys -t "claude_workspace:0.2" "clear" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo '=== 📊 進捗ステータス ==='" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo ''" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo '🎯 アクティブ役割: $role_name'" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo '📋 作業内容: $progress_message $dots'" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo '⏰ 開始時刻: $(date -d @$START_TIME +"%H:%M:%S")'" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo ''" C-m
+        tmux send-keys -t "claude_workspace:0.2" "echo '💡 Tip: この表示はClaudeの作業に影響しません'" C-m
     fi
 }
 
