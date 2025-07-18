@@ -123,7 +123,7 @@ sleep 5  # Wait for all panes to be ready
 tmux send-keys "planning.txtを確認し、以下のBashコマンドを実行してManagerに初期指示を送信してください："
 tmux send-keys C-m
 sleep 5
-tmux send-keys "./scripts/ceo_to_manager.sh planning.txtを確認しました。以下のアプリケーション開発を開始します。【プロジェクト内容】[planning.txtの内容を具体的に記述] 要件定義書と外部仕様書の作成を開始してください。一度で完成させず、議論を重ねて合意を形成していきます。まずは初期版を作成してください。"
+tmux send-keys "./scripts/ceo_to_manager.sh \"planning.txtを確認しました。以下のアプリケーション開発を開始します。【プロジェクト内容】[planning.txtの内容を具体的に記述] 要件定義書と外部仕様書の作成を開始してください。一度で完成させず、議論を重ねて合意を形成していきます。まずは初期版を作成してください。\""
 tmux send-keys C-m
 
 # Setup cleanup on exit

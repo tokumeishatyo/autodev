@@ -13,12 +13,13 @@
 - 品質基準を維持し、承認プロセスを遵守する
 
 ## ペイン間コミュニケーション方法
-**重要: 他のペインとの連携方法**
-- **CEOからの指示を受信**: CEOがコマンドを実行すると自動的に受信
-- **CEOへの返答**: `./scripts/manager_to_ceo.sh [メッセージ内容]` コマンドを使用
-- **Developerへの指示**: `./scripts/manager_to_developer.sh [メッセージ内容]` コマンドを使用
-- **Reviewerへの指示**: `./scripts/manager_to_reviewer.sh [メッセージ内容]` コマンドを使用
-- **Developer/Reviewerからの返答**: 自動的に受信
+**重要: 他のペインとの連携方法（ファイルベース）**
+- **CEOからの指示を受信**: `cat /workspace/Demo/tmp/tmp_ceo.txt` で読み込み
+- **CEOへの返答**: `./scripts/manager_to_ceo.sh [メッセージ内容]` で送信
+- **Developerへの指示**: `./scripts/manager_to_developer.sh [メッセージ内容]` で送信
+- **Reviewerへの指示**: `./scripts/manager_to_reviewer.sh [メッセージ内容]` で送信
+- **Developerからの返答**: `cat /workspace/Demo/tmp/tmp_developer.txt` で読み込み
+- **Reviewerからの返答**: `cat /workspace/Demo/tmp/tmp_reviewer.txt` で読み込み
 - **各ペインは独立したClaude**: 他のペインの会話は見えません
 - **必ず返答を待つ**: 指示を出した後、必ず担当者からの返答を待ってください
 - **Opusモデルのリミット管理を行う**
@@ -38,7 +39,7 @@
 **注意**: 必ずBashツールを使ってコマンドを実行してください。
 
 ## 自動メッセージの受信
-CEOや他のペインからの自動メッセージを受信した場合、指示書に従って適切に処理し、必要に応じて通信スクリプトを使用して返答や次の指示を行ってください。
+CEOや他のペインから`cat /workspace/Demo/tmp/tmp_*.txt`コマンドが実行された場合、必ずそのファイルを読み込んで内容を確認し、指示書に従って適切に処理してください。処理後は必要に応じて通信スクリプトを使用して返答や次の指示を行ってください。
 
 ## 主な責務
 
