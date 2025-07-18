@@ -102,13 +102,18 @@ tmux send-keys "必ず日本語で回答してください。"
 tmux send-keys C-m
 sleep 5
 
+# Wait for all Claude instances to be ready
+sleep 5
+
 # Start progress monitor in dedicated pane (pane 4)
 tmux select-pane -t 4
 tmux send-keys "/workspace/Demo/scripts/progress_monitor.sh" C-m
+sleep 2
 
 # Start usage monitor in dedicated pane (pane 5)
 tmux select-pane -t 5
 tmux send-keys "/workspace/Demo/scripts/usage_monitor_display.sh monitor" C-m
+sleep 2
 
 # Focus on CEO pane to start the workflow
 tmux select-pane -t 0
