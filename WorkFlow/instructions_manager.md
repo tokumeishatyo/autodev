@@ -41,6 +41,37 @@
 ## 自動メッセージの受信
 CEOや他のペインから`cat /workspace/Demo/tmp/tmp_*.txt`コマンドが実行された場合、必ずそのファイルを読み込んで内容を確認し、指示書に従って適切に処理してください。処理後は必要に応じて通信スクリプトを使用して返答や次の指示を行ってください。
 
+## 待機モード・復帰管理
+**Claude使用量制限による待機・復帰の管理**
+
+### 作業前必須チェック
+すべての作業開始前に使用量チェックを実行してください：
+```bash
+# 作業前チェック実行
+./scripts/check_usage_before_work.sh Manager "要件定義作成"
+
+# チェック結果が失敗(return 1)の場合は待機モードに入る
+if ! ./scripts/check_usage_before_work.sh Manager "要件定義作成"; then
+    ./scripts/manager_standby_mode.sh enter "使用量85%超過" "要件定義作成" "使用量回復後に要件定義作成を継続"
+fi
+```
+
+### 他役割からの制限報告対応
+Developer、Reviewer、CEOから使用量制限の報告を受けた場合：
+```bash
+# 制限報告を受信して待機モードに入る
+./scripts/manager_standby_mode.sh report "Developer" "使用量制限により作業を中断します"
+```
+
+### 復帰コマンド
+`/restart` コマンドを受信した場合：
+```bash
+# 待機モードから復帰
+./scripts/manager_standby_mode.sh restart
+```
+
+**重要**: 復帰後は作業状況ファイルを確認し、中断前の状況から作業を継続してください。
+
 ## 主な責務
 
 ### Phase 1: 要件定義・外部仕様作成（手順4-7）

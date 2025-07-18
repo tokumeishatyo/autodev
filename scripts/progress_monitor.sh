@@ -83,7 +83,7 @@ display_status() {
     
     echo "🎯 アクティブ役割: $role_icon $active_role"
     echo "📋 作業状況: $work_icon $progress_msg"
-    echo "⏰ 経過時間: $(printf "%02d:%02d" $elapsed_hours $remaining_minutes) $dots"
+    echo "⏰ 経過時間: $(printf "%02d:%02d" $elapsed_hours $remaining_minutes) $dots | 📅 $(TZ=Asia/Tokyo date '+%H:%M JST')"
     echo "🕐 開始時刻: $(date -d @$start_time +'%H:%M:%S')"
     echo "🔄 更新回数: $counter"
     echo ""

@@ -23,7 +23,7 @@ display_usage_status() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     printf "\n=== Claude使用量モニター ===\n"
-    printf "📅 更新時刻: %s\n" "$timestamp"
+    printf "📅 更新時刻: %s\n" "$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')"
     
     if [ -z "$usage" ] || [ "$usage" -eq 0 ]; then
         printf "⚠️  使用量: データなし\n"
