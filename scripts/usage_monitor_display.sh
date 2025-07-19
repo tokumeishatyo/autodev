@@ -1,6 +1,6 @@
 #!/bin/bash
 # Claude使用量表示モニター（max5プラン対応版）
-# 人間が理解しやすい形で現在の使用量とステータスを表示
+# 進捗モニターと統一されたシンプルな表示
 
 USAGE_LOG="/tmp/autodev_status/claude_usage.log"
 SHARED_DIR="/tmp/autodev_status"
@@ -56,12 +56,12 @@ parse_usage_data() {
     local data="$1"
     
     # トークン使用量
-    local tokens=$(echo "$data" | grep -oE 'トークン: [0-9]+' | grep -oE '[0-9]+' || echo "0")
-    local token_percentage=$(echo "$data" | grep -oE 'トークン:[^(]+\(([0-9]+)%\)' | grep -oE '[0-9]+' | head -1 || echo "0")
+    local tokens=$(echo "$data" | grep -oE 'トークン: [0-9]+' | grep -oE '[0-9]+' | head -1 || echo "0")
+    local token_percentage=$(echo "$data" | sed -n 's/.*トークン:[^(]*(\([0-9]\+\)%).*/\1/p' | head -1 || echo "0")
     
     # プロンプト使用量
-    local prompts=$(echo "$data" | grep -oE 'プロンプト: [0-9]+' | grep -oE '[0-9]+' || echo "0")
-    local prompt_percentage=$(echo "$data" | grep -oE 'プロンプト:[^(]+\(([0-9]+)%\)' | grep -oE '[0-9]+' | tail -1 || echo "0")
+    local prompts=$(echo "$data" | grep -oE 'プロンプト: [0-9]+' | grep -oE '[0-9]+' | head -1 || echo "0")
+    local prompt_percentage=$(echo "$data" | sed -n 's/.*プロンプト:[^(]*(\([0-9]\+\)%).*/\1/p' | head -1 || echo "0")
     
     # データソース
     local source=$(echo "$data" | grep -oE 'source: [a-z-]+' | cut -d' ' -f2 || echo "unknown")
@@ -69,127 +69,111 @@ parse_usage_data() {
     echo "$tokens|$token_percentage|$prompts|$prompt_percentage|$source"
 }
 
-# 使用量グラフの生成
-generate_usage_bar() {
-    local percentage="$1"
-    local width=30
-    local filled=$((percentage * width / 100))
-    local empty=$((width - filled))
-    
-    # 色の決定
-    local color=""
-    if [ "$percentage" -lt 50 ]; then
-        color="\033[32m"  # 緑
-    elif [ "$percentage" -lt 75 ]; then
-        color="\033[33m"  # 黄
-    elif [ "$percentage" -lt 85 ]; then
-        color="\033[35m"  # マゼンタ
-    else
-        color="\033[31m"  # 赤
-    fi
-    
-    # バーの生成
-    printf "[${color}"
-    for i in $(seq 1 $filled); do printf "█"; done
-    printf "\033[0m"
-    for i in $(seq 1 $empty); do printf "░"; done
-    printf "] %3d%%" "$percentage"
+# カウンター
+counter=0
+
+# 画面クリア関数
+clear_screen() {
+    clear
+    echo "================================================================"
+    echo "            📊 Claude使用量モニター (max5プラン)"
+    echo "================================================================"
+    echo ""
 }
 
 # 使用量状況の表示
 display_usage_status() {
-    local usage_data="$1"
-    
-    printf "\n╔══════════════════════════════════════╗\n"
-    printf "║     Claude使用量モニター (max5)     ║\n"
-    printf "╚══════════════════════════════════════╝\n"
-    printf "📅 更新時刻: %s\n\n" "$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')"
+    local usage_data=$(get_latest_usage_data)
     
     if [ -z "$usage_data" ]; then
-        printf "⚠️  使用量: データなし\n"
-        printf "💡 状態: 初回チェック待ち\n"
+        echo "⚠️  使用量: データなし"
+        echo "💡 状態: 初回チェック待ち"
     else
         # データ解析
         IFS='|' read -r tokens token_pct prompts prompt_pct source <<< "$(parse_usage_data "$usage_data")"
         
-        # トークン使用量表示
-        printf "📊 トークン使用量:\n"
-        printf "   "
-        generate_usage_bar "$token_pct"
-        printf "\n"
-        printf "   %s / %s トークン\n\n" "$tokens" "$MAX_TOKENS"
-        
-        # プロンプト使用量表示
-        printf "💬 プロンプト使用量:\n"
-        printf "   "
-        generate_usage_bar "$prompt_pct"
-        printf "\n"
-        printf "   %s / %s プロンプト\n\n" "$prompts" "$MAX_PROMPTS"
-        
-        # リセット情報
-        local remaining_time=$(get_remaining_time_string)
-        printf "⏰ リセットまで: %s\n" "$remaining_time"
-        
-        # 状態表示
+        # 状態判定
         local max_pct=$token_pct
         if [ "$prompt_pct" -gt "$max_pct" ]; then
             max_pct=$prompt_pct
         fi
         
-        printf "\n"
+        local status_icon=""
+        local status_text=""
         if [ "$max_pct" -lt 50 ]; then
-            printf "💚 状態: 正常動作中\n"
+            status_icon="✅"
+            status_text="正常動作中"
         elif [ "$max_pct" -lt 75 ]; then
-            printf "💛 状態: 使用量やや高め\n"
+            status_icon="⚠️"
+            status_text="使用量やや高め"
         elif [ "$max_pct" -lt 85 ]; then
-            printf "🧡 状態: 間もなく制限に到達\n"
+            status_icon="🚨"
+            status_text="間もなく制限に到達"
         else
-            printf "❤️  状態: 待機モード推奨\n"
+            status_icon="🚫"
+            status_text="待機モード推奨"
         fi
         
-        # データソース
-        printf "📡 データソース: %s\n" "$source"
+        # プログレスドット
+        local dots=""
+        case $((counter % 4)) in
+            0) dots="●○○○" ;;
+            1) dots="○●○○" ;;
+            2) dots="○○●○" ;;
+            3) dots="○○○●" ;;
+        esac
+        
+        # リセット情報
+        local remaining_time=$(get_remaining_time_string)
+        
+        # 表示
+        echo "📊 トークン使用量: $tokens / $MAX_TOKENS ($token_pct%)"
+        echo "💬 プロンプト使用量: $prompts / $MAX_PROMPTS ($prompt_pct%)"
+        echo "⏰ リセットまで: $remaining_time $dots | 📅 $(TZ=Asia/Tokyo date '+%H:%M JST')"
+        echo "📡 データソース: $source"
+        echo "🔄 更新回数: $counter"
+        echo ""
+        echo "$status_icon 状態: $status_text"
     fi
     
-    printf "══════════════════════════════════════\n"
+    # 現在のアクティブ役割も表示
+    if [ -f "$SHARED_DIR/active_role.txt" ]; then
+        local active_role=$(cat "$SHARED_DIR/active_role.txt" 2>/dev/null | head -1)
+        if [ -n "$active_role" ]; then
+            echo "🎯 現在アクティブ: $active_role"
+        fi
+    fi
+    
+    if [ -f "$SHARED_DIR/progress.txt" ]; then
+        local progress=$(cat "$SHARED_DIR/progress.txt" 2>/dev/null | head -1)
+        if [ -n "$progress" ]; then
+            echo "📝 進捗状況: $progress"
+        fi
+    fi
+    
+    echo ""
+    echo "💡 このモニターは独立して動作します"
+    echo "💡 終了するには Ctrl+C を押してください"
+    echo ""
+    echo "================================================================"
 }
 
 # リアルタイム監視モード
 monitor_mode() {
-    echo "🚀 Claude使用量リアルタイム監視を開始します..."
-    echo "終了するには Ctrl+C を押してください"
-    echo ""
+    echo "🚀 Claude使用量モニターを起動しています..."
+    sleep 2
     
     while true; do
-        clear
-        local usage_data=$(get_latest_usage_data)
-        display_usage_status "$usage_data"
-        
-        # 現在のアクティブ役割も表示
-        if [ -f "$SHARED_DIR/active_role.txt" ]; then
-            local active_role=$(cat "$SHARED_DIR/active_role.txt" 2>/dev/null | head -1)
-            if [ -n "$active_role" ]; then
-                printf "\n🎯 現在アクティブ: %s\n" "$active_role"
-            fi
-        fi
-        
-        if [ -f "$SHARED_DIR/progress.txt" ]; then
-            local progress=$(cat "$SHARED_DIR/progress.txt" 2>/dev/null | head -1)
-            if [ -n "$progress" ]; then
-                printf "📝 進捗状況: %s\n" "$progress"
-            fi
-        fi
-        
-        printf "\n💡 終了するには Ctrl+C を押してください\n"
-        
+        clear_screen
+        display_usage_status
+        counter=$((counter + 1))
         sleep 30  # 30秒間隔で更新
     done
 }
 
 # ワンショット表示モード
 oneshot_mode() {
-    local usage_data=$(get_latest_usage_data)
-    display_usage_status "$usage_data"
+    display_usage_status
 }
 
 # メイン処理
@@ -217,7 +201,13 @@ main() {
 }
 
 # Ctrl+Cのハンドリング
-trap 'echo ""; echo "監視を終了します..."; exit 0' INT
+cleanup() {
+    echo ""
+    echo "🛑 使用量モニターを終了しています..."
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM
 
 # スクリプトが直接実行された場合
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
