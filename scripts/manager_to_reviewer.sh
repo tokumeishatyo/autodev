@@ -14,10 +14,11 @@ fi
 CURRENT_PANE=$(tmux display-message -p '#P')
 
 # 作業種別を自動検出
-WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 3)
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_TYPE=$(source "$WORKSPACE_DIR/scripts/detect_work_type.sh" && detect_work_type "$MESSAGE" 1 3)
 
 # 通信前チェック（リミット＋生存確認）
-HEALTH_INTEGRATION="/workspace/Demo/scripts/manager_health_integration.sh"
+HEALTH_INTEGRATION="$WORKSPACE_DIR/scripts/manager_health_integration.sh"
 if [ -f "$HEALTH_INTEGRATION" ]; then
     echo "📊 システム状態とClaude使用量をチェックしています..."
     "$HEALTH_INTEGRATION" comm_check "Reviewer" "$MESSAGE"
@@ -33,24 +34,24 @@ if [ -f "$HEALTH_INTEGRATION" ]; then
 else
     # 従来のチェック方法（フォールバック）
     echo "📊 Claude使用量をチェックしています..."
-    if ! /workspace/Demo/scripts/check_claude_usage.sh; then
+    if ! "$WORKSPACE_DIR/scripts/check_claude_usage.sh"; then
         echo "❌ 使用量チェックでエラーが発生しました。"
         exit 1
     fi
 fi
 
 # メッセージをファイルに書き込み（上書き）
-echo "$MESSAGE" > /workspace/Demo/tmp/tmp_manager.txt
+echo "$MESSAGE" > "$WORKSPACE_DIR/tmp/tmp_manager.txt"
 
 # ログファイルに追記
-echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → Reviewer: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
+echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → Reviewer: $MESSAGE" >> "$WORKSPACE_DIR/logs/communication_log.txt"
 
 # 独立ターミナルの進捗モニターに状態更新
-/workspace/Demo/scripts/update_progress_status.sh "Reviewer" "Managerからのレビュー依頼を受信、確認中..." "$WORK_TYPE" >/dev/null 2>&1
+"$WORKSPACE_DIR/scripts/update_progress_status.sh" "Reviewer" "Managerからのレビュー依頼を受信、確認中..." "$WORK_TYPE" >/dev/null 2>&1
 
 # Reviewerペイン（pane 2）に切り替えて通知メッセージを送信
 tmux select-pane -t claude_workspace:0.2
-tmux send-keys -t claude_workspace:0.2 "cat /workspace/Demo/tmp/tmp_manager.txt"
+tmux send-keys -t claude_workspace:0.2 "cat \"$WORKSPACE_DIR/tmp/tmp_manager.txt\""
 tmux send-keys -t claude_workspace:0.2 C-m
 
 # 元のペインに戻る

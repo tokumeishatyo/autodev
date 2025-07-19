@@ -4,7 +4,7 @@
 # 通常の作業フローに生存確認を統合
 
 # 設定
-WORKSPACE_DIR="/workspace/Demo"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HEALTH_CHECK_SCRIPT="$WORKSPACE_DIR/scripts/health_check.sh"
 USAGE_MONITOR_SCRIPT="$WORKSPACE_DIR/scripts/usage_monitor.sh"
 LOG_FILE="$WORKSPACE_DIR/logs/manager_health.log"

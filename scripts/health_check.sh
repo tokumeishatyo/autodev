@@ -4,7 +4,7 @@
 # Manager主導で他のペインの生存確認を行う
 
 # 設定
-WORKSPACE_DIR="/workspace/Demo"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_FILE="$WORKSPACE_DIR/logs/health_check.log"
 STATE_FILE="$WORKSPACE_DIR/tmp/system_state.txt"
 TMUX_SESSION="claude_workspace"

@@ -14,7 +14,7 @@ fi
 CURRENT_PANE=$(tmux display-message -p '#P')
 
 # 通信前チェック（リミット＋生存確認）
-HEALTH_INTEGRATION="/workspace/Demo/scripts/manager_health_integration.sh"
+HEALTH_INTEGRATION="$WORKSPACE_DIR/scripts/manager_health_integration.sh"
 if [ -f "$HEALTH_INTEGRATION" ]; then
     echo "📊 システム状態とClaude使用量をチェックしています..."
     "$HEALTH_INTEGRATION" comm_check "CEO" "$MESSAGE"
@@ -30,26 +30,27 @@ if [ -f "$HEALTH_INTEGRATION" ]; then
 fi
 
 # Manager作業完了のため進捗表示を停止
-/workspace/Demo/scripts/stop_progress.sh >/dev/null 2>&1
+"$WORKSPACE_DIR/scripts/stop_progress.sh" >/dev/null 2>&1
 
 # 作業種別を自動検出
-WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 0)
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_TYPE=$(source "$WORKSPACE_DIR/scripts/detect_work_type.sh" && detect_work_type "$MESSAGE" 1 0)
 
 # メッセージをファイルに書き込み（上書き）
-echo "$MESSAGE" > /workspace/Demo/tmp/tmp_manager.txt
+echo "$MESSAGE" > "$WORKSPACE_DIR/tmp/tmp_manager.txt"
 
 # ログファイルに追記
-echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → CEO: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
+echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → CEO: $MESSAGE" >> "$WORKSPACE_DIR/logs/communication_log.txt"
 
 # 独立ターミナルの進捗モニターに状態更新
-/workspace/Demo/scripts/update_progress_status.sh "CEO" "Managerからの報告を受信、検討中..." "$WORK_TYPE" >/dev/null 2>&1
+"$WORKSPACE_DIR/scripts/update_progress_status.sh" "CEO" "Managerからの報告を受信、検討中..." "$WORK_TYPE" >/dev/null 2>&1
 
 # CEOペインで進捗表示を開始
-/workspace/Demo/scripts/start_progress.sh 0 "$WORK_TYPE" >/dev/null 2>&1 &
+"$WORKSPACE_DIR/scripts/start_progress.sh" 0 "$WORK_TYPE" >/dev/null 2>&1 &
 
 # CEOペイン（pane 0）に切り替えて通知メッセージを送信
 tmux select-pane -t claude_workspace:0.0
-tmux send-keys -t claude_workspace:0.0 "cat /workspace/Demo/tmp/tmp_manager.txt"
+tmux send-keys -t claude_workspace:0.0 "cat \"$WORKSPACE_DIR/tmp/tmp_manager.txt\""
 tmux send-keys -t claude_workspace:0.0 C-m
 
 # 元のペインに戻る
