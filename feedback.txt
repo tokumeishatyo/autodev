@@ -1,0 +1,4 @@
+Claude usage limit reached. Your limit will reset at 5pm (UTC).
+
+いくつかフィードバックする点があります。順にお伝えしますので修正よろしくお願いします。
+コードレビューの最終承認のあとReviewerからManagerに承認する旨のメッセージが飛んでいないようです。まず、修正の前に確認してください。

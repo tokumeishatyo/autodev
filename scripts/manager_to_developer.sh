@@ -16,18 +16,34 @@ CURRENT_PANE=$(tmux display-message -p '#P')
 # 作業種別を自動検出
 WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_type "$MESSAGE" 1 4)
 
-# Claude使用量をチェック
-echo "📊 Claude使用量をチェックしています..."
-if ! /workspace/Demo/scripts/check_claude_usage.sh; then
-    echo "❌ 使用量チェックでエラーが発生しました。"
-    exit 1
+# 通信前チェック（リミット＋生存確認）
+HEALTH_INTEGRATION="/workspace/Demo/scripts/manager_health_integration.sh"
+if [ -f "$HEALTH_INTEGRATION" ]; then
+    echo "📊 システム状態とClaude使用量をチェックしています..."
+    "$HEALTH_INTEGRATION" comm_check "Developer" "$MESSAGE"
+    local check_result=$?
+    
+    if [ $check_result -eq 2 ]; then
+        echo "待機モードに移行したため通信を中止しました"
+        exit 2
+    elif [ $check_result -eq 1 ]; then
+        echo "システム異常のため通信を中止しました"
+        exit 1
+    fi
+else
+    # 従来のチェック方法（フォールバック）
+    echo "📊 Claude使用量をチェックしています..."
+    if ! /workspace/Demo/scripts/check_claude_usage.sh; then
+        echo "❌ 使用量チェックでエラーが発生しました。"
+        exit 1
+    fi
 fi
 
 # メッセージをファイルに書き込み（上書き）
 echo "$MESSAGE" > /workspace/Demo/tmp/tmp_manager.txt
 
-# ログファイルに追記
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Manager → Developer: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
+# ログファイルに追記（日本時間）
+echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → Developer: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
 
 # 独立ターミナルの進捗モニターに状態更新
 /workspace/Demo/scripts/update_progress_status.sh "Developer" "Managerからの指示を受信、開発作業を開始..." "$WORK_TYPE" >/dev/null 2>&1

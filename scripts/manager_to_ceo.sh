@@ -13,6 +13,22 @@ fi
 # 現在のペインを保存
 CURRENT_PANE=$(tmux display-message -p '#P')
 
+# 通信前チェック（リミット＋生存確認）
+HEALTH_INTEGRATION="/workspace/Demo/scripts/manager_health_integration.sh"
+if [ -f "$HEALTH_INTEGRATION" ]; then
+    echo "📊 システム状態とClaude使用量をチェックしています..."
+    "$HEALTH_INTEGRATION" comm_check "CEO" "$MESSAGE"
+    local check_result=$?
+    
+    if [ $check_result -eq 2 ]; then
+        echo "待機モードに移行したため通信を中止しました"
+        exit 2
+    elif [ $check_result -eq 1 ]; then
+        echo "システム異常のため通信を中止しました"
+        exit 1
+    fi
+fi
+
 # Manager作業完了のため進捗表示を停止
 /workspace/Demo/scripts/stop_progress.sh >/dev/null 2>&1
 
@@ -23,7 +39,7 @@ WORK_TYPE=$(source /workspace/Demo/scripts/detect_work_type.sh && detect_work_ty
 echo "$MESSAGE" > /workspace/Demo/tmp/tmp_manager.txt
 
 # ログファイルに追記
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Manager → CEO: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
+echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] Manager → CEO: $MESSAGE" >> /workspace/Demo/logs/communication_log.txt
 
 # 独立ターミナルの進捗モニターに状態更新
 /workspace/Demo/scripts/update_progress_status.sh "CEO" "Managerからの報告を受信、検討中..." "$WORK_TYPE" >/dev/null 2>&1

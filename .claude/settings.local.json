@@ -1,8 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(tmux list-sessions:*)"
     ],
     "deny": []
   },
@@ -15,7 +14,7 @@
       ]
     },
     "on_tool_result": {
-      "command": "bash", 
+      "command": "bash",
       "args": [
         "-c",
         "if [ \"$CLAUDE_TOOL_NAME\" = \"Write\" ] || [ \"$CLAUDE_TOOL_NAME\" = \"Edit\" ] || [ \"$CLAUDE_TOOL_NAME\" = \"MultiEdit\" ]; then echo \"$CLAUDE_TOOL_CALL\" | jq -r 'if .parameters.file_path and (.parameters.file_path | test(\"coding_log|work_notes|detailed_spec|unit_test|integration_test\")) then \"[\" + (now | strftime(\"%Y-%m-%d %H:%M:%S\")) + \"] Developer Work Log - \" + .parameters.file_path + \": \" + (.parameters.description // \"File modified\") else empty end' >> /workspace/Demo/logs/developer_work_log.txt; fi"
