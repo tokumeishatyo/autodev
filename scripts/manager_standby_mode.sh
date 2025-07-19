@@ -1,7 +1,8 @@
 #!/bin/bash
 # Manager専用待機モード管理スクリプト
 
-STANDBY_DIR="/workspace/Demo/tmp/standby"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STANDBY_DIR="$WORKSPACE_DIR/tmp/standby"
 WORK_STATE_FILE="$STANDBY_DIR/work_state.txt"
 STANDBY_LOG="$STANDBY_DIR/standby_log.txt"
 
@@ -61,7 +62,7 @@ EOF
     echo "[$JST_TIME] 待機モード開始: $reason" >> "$STANDBY_LOG"
     
     # 進捗モニターに状態更新
-    /workspace/Demo/scripts/update_progress_status.sh "Manager" "⏸️ 待機モード: Claude使用量制限" "待機" >/dev/null 2>&1
+    "$WORKSPACE_DIR/scripts/update_progress_status.sh" "Manager" "⏸️ 待機モード: Claude使用量制限" "待機" >/dev/null 2>&1
     
     # Managerペインにフォーカス
     tmux select-pane -t claude_workspace:0.1
@@ -101,7 +102,7 @@ exit_standby_mode() {
     echo "[$JST_TIME] 待機モード終了: 作業再開" >> "$STANDBY_LOG"
     
     # 進捗モニターに状態更新
-    /workspace/Demo/scripts/update_progress_status.sh "Manager" "🔄 待機モードから復帰、作業再開中..." "復帰" >/dev/null 2>&1
+    "$WORKSPACE_DIR/scripts/update_progress_status.sh" "Manager" "🔄 待機モードから復帰、作業再開中..." "復帰" >/dev/null 2>&1
     
     return 0
 }

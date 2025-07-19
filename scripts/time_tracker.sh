@@ -3,11 +3,14 @@
 # Time tracking script for autodev workflow
 # Usage: ./time_tracker.sh start|end <role> <task_description>
 
-LOG_FILE="/workspace/Demo/logs/time_tracking_log.txt"
-CURRENT_TASK_FILE="/workspace/Demo/logs/current_task.txt"
+# ベースディレクトリを取得
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+LOG_FILE="$WORKSPACE_DIR/logs/time_tracking_log.txt"
+CURRENT_TASK_FILE="$WORKSPACE_DIR/logs/current_task.txt"
 
 # Create logs directory if it doesn't exist
-mkdir -p /workspace/Demo/logs
+mkdir -p "$WORKSPACE_DIR/logs"
 
 # Function to log with timestamp
 log_with_timestamp() {
