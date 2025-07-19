@@ -78,23 +78,11 @@ get_ccusage_data() {
     echo "0"
 }
 
-# claude-monitorから使用量データを取得（非対話的）
-get_monitor_data() {
-    if command -v claude-monitor >/dev/null 2>&1; then
-        # claude-monitorを一時的に実行してデータを取得（タイムアウト付き）
-        local monitor_output=$(timeout 2 claude-monitor 2>&1 | head -50)
-        
-        # トークン使用量を探す
-        local token_usage=$(echo "$monitor_output" | grep -A1 "Token Usage:" | tail -1 | grep -oE '[0-9,]+' | head -1 | tr -d ',')
-        
-        if [ -n "$token_usage" ] && [ "$token_usage" -gt 0 ]; then
-            echo "$token_usage"
-        else
-            echo "0"
-        fi
-    else
-        echo "0"
-    fi
+# ccusageからプロンプト数を取得
+get_prompt_count() {
+    # ccusageはプロンプト数を直接提供しないため、現在は推定値を使用
+    # 将来的にはAPI呼び出し回数などから計算する可能性がある
+    echo "0"
 }
 
 # プロンプト数を推定（簡易計算）
@@ -112,14 +100,18 @@ check_usage() {
     local current_tokens=""
     local usage_source=""
     
-    # まずccusageを試行
+    # ccusageから使用量を取得
     current_tokens=$(get_ccusage_data)
-    if [ -n "$current_tokens" ] && [ "$current_tokens" -gt 0 ]; then
-        usage_source="ccusage"
-    else
-        # ccusageが失敗した場合はclaude-monitorを使用
-        current_tokens=$(get_monitor_data)
-        usage_source="claude-monitor"
+    usage_source="ccusage"
+    
+    # 使用量が0の場合は警告
+    if [ "$current_tokens" -eq 0 ]; then
+        echo "⚠️  警告: 使用量データを取得できませんでした。ccusageが今日のデータをまだ記録していない可能性があります。"
+        echo "   手動で確認するには: npx ccusage@latest"
+        # 安全のため、使用量不明の場合は50%として扱う
+        echo "   安全のため、使用量を50%と仮定して処理を続行します。"
+        current_tokens=$((MAX_TOKENS / 2))
+        usage_source="estimated"
     fi
     
     # 使用率を計算
@@ -136,7 +128,11 @@ check_usage() {
     local remaining_time=$(get_remaining_time_string)
     
     # ログに記録（日本時間）
-    echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] トークン: ${current_tokens}/${MAX_TOKENS} (${token_percentage}%), プロンプト: ${prompt_count}/${MAX_PROMPTS} (${prompt_percentage}%), リセットまで: ${remaining_time} (source: $usage_source)" >> "$USAGE_LOG"
+    if [ "$usage_source" = "estimated" ]; then
+        echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] トークン: 推定${current_tokens}/${MAX_TOKENS} (${token_percentage}%), プロンプト: ${prompt_count}/${MAX_PROMPTS} (${prompt_percentage}%), リセットまで: ${remaining_time} (source: $usage_source)" >> "$USAGE_LOG"
+    else
+        echo "[$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')] トークン: ${current_tokens}/${MAX_TOKENS} (${token_percentage}%), プロンプト: ${prompt_count}/${MAX_PROMPTS} (${prompt_percentage}%), リセットまで: ${remaining_time} (source: $usage_source)" >> "$USAGE_LOG"
+    fi
     
     # 最も高い使用率を返す
     if [ "$token_percentage" -gt "$prompt_percentage" ]; then
@@ -202,8 +198,10 @@ main() {
     local current_usage=$(check_usage)
     
     if [ -z "$current_usage" ]; then
-        echo "⚠️ 使用量を取得できませんでした。作業を続行します。"
-        return 0
+        echo "⚠️ 使用量を取得できませんでした。"
+        echo "   手動確認: npx ccusage@latest"
+        echo "   安全のため50%として処理します。"
+        current_usage=50
     fi
     
     local remaining_time=$(get_remaining_time_string)

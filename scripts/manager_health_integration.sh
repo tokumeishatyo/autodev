@@ -6,7 +6,7 @@
 # 設定
 WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HEALTH_CHECK_SCRIPT="$WORKSPACE_DIR/scripts/health_check.sh"
-USAGE_MONITOR_SCRIPT="$WORKSPACE_DIR/scripts/usage_monitor.sh"
+USAGE_CHECK_SCRIPT="$WORKSPACE_DIR/scripts/check_claude_usage.sh"
 LOG_FILE="$WORKSPACE_DIR/logs/manager_health.log"
 
 # 日本時間で現在時刻を取得
@@ -26,8 +26,8 @@ pre_work_check() {
     log_message "作業前チェック開始: $operation_name"
     
     # 1. リミットチェック
-    if [ -f "$USAGE_MONITOR_SCRIPT" ]; then
-        local usage_output=$("$USAGE_MONITOR_SCRIPT" 2>&1)
+    if [ -f "$USAGE_CHECK_SCRIPT" ]; then
+        local usage_output=$("$USAGE_CHECK_SCRIPT" 2>&1)
         local usage_status=$?
         
         echo "$usage_output"

@@ -105,8 +105,10 @@ sleep 5
 # Wait for all Claude instances to be ready
 sleep 5
 
-# Start progress monitor in dedicated pane (pane 4)
+# Initialize project and start progress monitor in dedicated pane (pane 4)
 tmux select-pane -t 4
+tmux send-keys "/workspace/Demo/scripts/init_project.sh --resume" C-m
+sleep 3
 tmux send-keys "/workspace/Demo/scripts/progress_monitor.sh" C-m
 sleep 2
 
