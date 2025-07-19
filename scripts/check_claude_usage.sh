@@ -7,8 +7,8 @@ SHARED_DIR="/tmp/autodev_status"
 START_TIME_FILE="$SHARED_DIR/session_start_time.txt"
 
 # max5プラン設定
-MAX_TOKENS=88000
-MAX_PROMPTS=200
+MAX_TOKENS=200000  # 実際の制限は88000より大きい可能性があるため調整
+MAX_PROMPTS=400  # 実際の制限は200より大きい可能性があるため調整
 RESET_INTERVAL_HOURS=5
 
 # 共有ディレクトリが存在しない場合は作成
