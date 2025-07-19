@@ -58,10 +58,18 @@ get_ccusage_data() {
     if [ -n "$today_line" ]; then
         # ANSIエスケープシーケンスを除去
         local clean_line=$(echo "$today_line" | sed 's/\x1b\[[0-9;]*m//g')
-        # 8番目のカラム（Total Tokens）を抽出
-        local total_tokens=$(echo "$clean_line" | awk -F'│' '{print $8}' | grep -oE '[0-9,]+' | tr -d ',' | tr -d ' ')
+        # 4番目のカラム（Input）と5番目のカラム（Output）を抽出して合計
+        local input_tokens=$(echo "$clean_line" | awk -F'│' '{print $4}' | grep -oE '[0-9,]+' | tr -d ',' | tr -d ' ')
+        local output_tokens=$(echo "$clean_line" | awk -F'│' '{print $5}' | grep -oE '[0-9,]+' | tr -d ',' | tr -d ' ')
         
-        if [ -n "$total_tokens" ] && [ "$total_tokens" -gt 0 ]; then
+        # デフォルト値の設定
+        input_tokens=${input_tokens:-0}
+        output_tokens=${output_tokens:-0}
+        
+        # Input + Outputの合計を計算
+        local total_tokens=$((input_tokens + output_tokens))
+        
+        if [ "$total_tokens" -gt 0 ]; then
             echo "$total_tokens"
             return 0
         fi
