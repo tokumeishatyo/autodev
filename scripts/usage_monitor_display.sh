@@ -5,10 +5,12 @@
 USAGE_LOG="/tmp/autodev_status/claude_usage.log"
 SHARED_DIR="/tmp/autodev_status"
 START_TIME_FILE="$SHARED_DIR/session_start_time.txt"
+BASELINE_FILE="$SHARED_DIR/project_baseline.txt"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # max5プラン設定
-MAX_TOKENS=88000
-MAX_PROMPTS=200
+MAX_TOKENS=200000
+MAX_PROMPTS=400
 RESET_INTERVAL_HOURS=5
 
 # 共有ディレクトリが存在しない場合は作成
@@ -81,8 +83,34 @@ clear_screen() {
     echo ""
 }
 
+# プロジェクトベースラインを読み込み
+load_project_baseline() {
+    if [ -f "$BASELINE_FILE" ]; then
+        source "$BASELINE_FILE"
+    else
+        PROJECT_START_TOKENS=0
+        PROJECT_START_TIME="N/A"
+        PROJECT_NAME="Unknown"
+    fi
+}
+
+# プロジェクト使用量計算
+calculate_project_usage() {
+    local current_tokens="$1"
+    local baseline_tokens="${PROJECT_START_TOKENS:-0}"
+    
+    if [ "$baseline_tokens" -eq 0 ] || [ "$current_tokens" -lt "$baseline_tokens" ]; then
+        echo "0"
+    else
+        echo $((current_tokens - baseline_tokens))
+    fi
+}
+
 # 使用量状況の表示
 display_usage_status() {
+    # プロジェクトベースラインを読み込み
+    load_project_baseline
+    
     local usage_data=$(get_latest_usage_data)
     
     if [ -z "$usage_data" ]; then
@@ -91,6 +119,9 @@ display_usage_status() {
     else
         # データ解析
         IFS='|' read -r tokens token_pct prompts prompt_pct source <<< "$(parse_usage_data "$usage_data")"
+        
+        # プロジェクト使用量計算
+        local project_tokens=$(calculate_project_usage "$tokens")
         
         # 状態判定
         local max_pct=$token_pct
@@ -127,7 +158,15 @@ display_usage_status() {
         local remaining_time=$(get_remaining_time_string)
         
         # 表示
-        echo "📊 トークン使用量: $tokens / $MAX_TOKENS ($token_pct%)"
+        echo "📊 使用量状況"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🌐 本日累計: $tokens / $MAX_TOKENS ($token_pct%)"
+        echo "📁 プロジェクト: ${project_tokens}トークン（開始: ${PROJECT_START_TOKENS}）"
+        if [ "$project_tokens" -gt 0 ]; then
+            local cost_estimate=$(echo "scale=2; $project_tokens * 0.000015" | bc 2>/dev/null || echo "N/A")
+            echo "💰 推定コスト: \$$cost_estimate"
+        fi
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "💬 プロンプト使用量: $prompts / $MAX_PROMPTS ($prompt_pct%)"
         echo "⏰ リセットまで: $remaining_time $dots | 📅 $(TZ=Asia/Tokyo date '+%H:%M JST')"
         echo "📡 データソース: $source"

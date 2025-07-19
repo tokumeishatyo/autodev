@@ -48,6 +48,55 @@ save_current_hash() {
     fi
 }
 
+# プロジェクトベースラインを初期化
+init_project_baseline() {
+    local baseline_file="/tmp/autodev_status/project_baseline.txt"
+    mkdir -p "$(dirname "$baseline_file")"
+    
+    # 現在のトークン使用量を取得
+    local current_tokens=$(get_current_tokens)
+    local timestamp=$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')
+    
+    # ベースライン情報を記録
+    cat > "$baseline_file" << EOF
+# プロジェクトベースライン情報
+PROJECT_START_TIME="$timestamp"
+PROJECT_START_TOKENS="$current_tokens"
+PROJECT_NAME="$(basename "$WORKSPACE_DIR")"
+PLANNING_HASH="$(get_planning_hash)"
+EOF
+    
+    print_info "プロジェクトベースラインを記録しました"
+    print_info "開始時トークン: $current_tokens"
+}
+
+# 現在のトークン使用量を取得
+get_current_tokens() {
+    # check_claude_usage.shから使用量を取得
+    local usage_script="$WORKSPACE_DIR/scripts/check_claude_usage.sh"
+    if [ -f "$usage_script" ]; then
+        # ccusageから直接トークン数を取得
+        local ccusage_output=$(npx ccusage@latest 2>/dev/null)
+        local today_date=$(date +%m-%d)
+        local today_line=$(echo "$ccusage_output" | grep -B2 "$today_date" | grep "opus-4" | tail -1)
+        
+        if [ -n "$today_line" ]; then
+            local clean_line=$(echo "$today_line" | sed 's/\x1b\[[0-9;]*m//g')
+            local input_tokens=$(echo "$clean_line" | awk -F'│' '{print $4}' | grep -oE '[0-9,]+' | tr -d ',' | tr -d ' ')
+            local output_tokens=$(echo "$clean_line" | awk -F'│' '{print $5}' | grep -oE '[0-9,]+' | tr -d ',' | tr -d ' ')
+            
+            input_tokens=${input_tokens:-0}
+            output_tokens=${output_tokens:-0}
+            
+            echo $((input_tokens + output_tokens))
+        else
+            echo "0"
+        fi
+    else
+        echo "0"
+    fi
+}
+
 # 既存ファイルの存在チェック
 check_existing_files() {
     local has_logs=false
@@ -119,6 +168,8 @@ clean_project_files() {
     # セッション状態の削除
     rm -f "/tmp/autodev_status/session_start_time.txt" 2>/dev/null
     rm -f "/tmp/autodev_status/claude_usage.log" 2>/dev/null
+    rm -f "/tmp/autodev_status/project_baseline.txt" 2>/dev/null
+    rm -f "/tmp/autodev_status/usage_check_result.txt" 2>/dev/null
     print_info "セッション状態をクリーニングしました"
     
     print_success "クリーニング完了"
@@ -180,6 +231,7 @@ prompt_user_action() {
             1)
                 print_success "既存プロジェクトを継続します"
                 save_current_hash
+                # 既存プロジェクト継続時はベースラインを保持
                 return 0
                 ;;
             2)
@@ -188,6 +240,8 @@ prompt_user_action() {
                 create_backup
                 clean_project_files
                 save_current_hash
+                # 新規プロジェクト開始時にベースラインを記録
+                init_project_baseline
                 print_success "新規プロジェクトの準備が完了しました"
                 return 0
                 ;;
@@ -199,6 +253,8 @@ prompt_user_action() {
                 if [[ "$confirm" =~ ^[Yy] ]]; then
                     clean_project_files
                     save_current_hash
+                    # 新規プロジェクト開始時にベースラインを記録
+                    init_project_baseline
                     print_success "新規プロジェクトの準備が完了しました"
                     return 0
                 else
@@ -254,6 +310,8 @@ main() {
         print_warning "強制クリーニングモードで実行"
         clean_project_files
         save_current_hash
+        # 強制クリーニング時にベースラインを記録
+        init_project_baseline
         return 0
     fi
     
@@ -287,6 +345,8 @@ main() {
         else
             print_info "初回実行を検出しました"
             save_current_hash
+            # 初回実行時にベースラインを記録
+            init_project_baseline
             print_success "プロジェクトを初期化しました"
         fi
         return 0
